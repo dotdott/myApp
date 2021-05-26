@@ -5,21 +5,42 @@ import {Platform, StyleSheet} from 'react-native';
 import {Login} from '../screens/Login';
 
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import {User} from '../screens/User';
+import {myVar} from '../styleVariables';
 
 const AppTab = createBottomTabNavigator();
 
 const AuthRoutes = () => (
   <AppTab.Navigator
     tabBarOptions={{
-      activeTintColor: '#000',
-      inactiveTintColor: '#000',
+      activeTintColor: myVar.orange,
+      inactiveTintColor: myVar.light_orange,
       // labelPosition: 'beside-icon',
       style: {
         paddingVertical: Platform.OS === 'ios' ? 20 : 0,
-        height: 80,
+        height: 70,
         zIndex: 999,
+        borderTopWidth: 1,
+        borderTopColor: myVar.orange,
       },
-    }}>
+    }}
+    initialRouteName="Homepage">
+    <AppTab.Screen
+      name="Login"
+      component={Login}
+      options={{
+        tabBarLabel: '',
+        tabBarIcon: ({size, color}) => (
+          <Icon
+            name="bookmark"
+            // solid
+            color={color}
+            size={size}
+            style={styles.icon}
+          />
+        ),
+      }}
+    />
     <AppTab.Screen
       name="Homepage"
       component={Home}
@@ -29,23 +50,23 @@ const AuthRoutes = () => (
           <Icon
             name="home"
             solid
-            color="#f38"
-            size={size}
-            style={styles.icon}
+            color={color}
+            size={36}
+            style={styles.iconMiddle}
           />
         ),
       }}
     />
     <AppTab.Screen
-      name="Login"
-      component={Login}
+      name="User"
+      component={User}
       options={{
         tabBarLabel: '',
         tabBarIcon: ({size, color}) => (
           <Icon
-            name="facebook"
+            name="user"
             solid
-            color="#f38"
+            color={color}
             size={size}
             style={styles.icon}
           />
@@ -57,12 +78,18 @@ const AuthRoutes = () => (
 
 const styles = StyleSheet.create({
   icon: {
-    borderColor: '#000',
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderRadius: 99,
     padding: 5,
     marginTop: 15,
+  },
+  iconMiddle: {
+    borderRadius: 99,
+    padding: 20,
+    marginTop: -35,
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderBottomWidth: 0,
+    // borderRightWidth: 0,
+    borderColor: myVar.orange,
   },
 });
 

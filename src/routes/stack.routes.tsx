@@ -1,7 +1,7 @@
-import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
-import {Home} from '../screens/Home';
+import React from 'react';
 import {Login} from '../screens/Login';
+import {User} from '../screens/User';
 import AuthRoutes from './tab.routes';
 
 const stackRoutes = createStackNavigator();
@@ -9,13 +9,15 @@ const stackRoutes = createStackNavigator();
 const AppRoutes: React.FC = () => (
   <stackRoutes.Navigator
     headerMode="none"
-    initialRouteName="Login"
+    initialRouteName="User"
     screenOptions={{
       cardStyle: {
-        backgroundColor: '#fff',
+        backgroundColor: '#f8f',
+        borderTopColor: '#000',
       },
     }}>
     <stackRoutes.Screen name="Homepage" component={AuthRoutes} />
+    <stackRoutes.Screen name="User" component={AuthRoutes} />
     <stackRoutes.Screen name="Login" component={Login} />
   </stackRoutes.Navigator>
 );

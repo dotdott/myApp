@@ -1,4 +1,7 @@
 import React, {useEffect, useState} from 'react';
+import firebase from 'firebase/app';
+import {auth} from '../../firebase';
+
 import {Alert, Animated, ImageBackground} from 'react-native';
 import {
   Container,
@@ -9,20 +12,20 @@ import {
   RegisterSpan,
   RegisterText,
 } from './styles';
-
-
-interface loginFieldsProps {
-  email?: string;
-  password?: string;
-}
+import {useDispatch, useSelector} from 'react-redux';
+import {Types} from '../../store/reducers/authReducer';
 
 const wallpaper = {
   uri: 'https://www.fashionwallpaper.co.uk/media/catalog/product/cache/1/image/475x/040ec09b1e35df139433887a97daa66f/_/_/__auto_tile_24310__137144full.png',
 };
 
 export const Login = ({navigation}: any) => {
-  const [loginFields, setLoginFields] = useState<loginFieldsProps>({});
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [bouncingLogin] = useState(new Animated.ValueXY({x: 0, y: 150}));
+  const [currentUser, setCurrentUser] = useState<firebase.User | null>(null);
+  const dispatch = useDispatch();
+  const user = useSelector<any>(state => state.authReducer);
 
   useEffect(() => {
     Animated.spring(bouncingLogin.y, {
@@ -37,9 +40,36 @@ export const Login = ({navigation}: any) => {
     return Alert.alert('Cadastrei!');
   }
 
-  function handleLogin() {
-    return navigation.navigate('Homepage');
+  async function handleLogin() {
+    if (loginEmail !== '' && loginPassword !== '') {
+      try {
+        await SignIn(loginEmail, loginPassword);
+
+        dispatch({
+          type: Types.CURRENT_USER,
+          email: loginEmail,
+          password: loginPassword,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    // return navigation.navigate('Homepage');
   }
+
+  function SignIn(email: string, password: string) {
+    return auth.signInWithEmailAndPassword(email, password);
+  }
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      setCurrentUser(user);
+    });
+
+    console.log(user);
+    return unsubscribe;
+  }, [SignIn]);
+
   return (
     <Animated.View
       style={{
@@ -61,16 +91,16 @@ export const Login = ({navigation}: any) => {
         <EmailInput
           placeholder="E-mail"
           autoCorrect={false}
-          onChangeText={e => setLoginFields({email: e})}
+          onChangeText={(e: string) => setLoginEmail(e)}
         />
         <PasswordInput
           placeholder="Senha"
           autoCorrect={false}
           secureTextEntry
-          onChangeText={e => setLoginFields({password: e})}
+          onChangeText={(e: string) => setLoginPassword(e)}
         />
 
-        <LoginButton onPress={() => navigation.navigate('Homepage')}>
+        <LoginButton onPress={handleLogin}>
           <LoginText>Login</LoginText>
         </LoginButton>
 
