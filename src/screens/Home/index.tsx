@@ -1,11 +1,36 @@
-import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, {useEffect} from 'react';
 import {Text} from 'react-native';
+import {TouchableOpacity} from 'react-native-gesture-handler';
+import {auth} from '../../firebase';
 import {Container} from './styles';
 
-export const Home = () => {
+export const Home = ({navigation}: any) => {
+  const logout = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@myApp_key');
+      console.log('jsonzado' + jsonValue);
+      return jsonValue != null ? removeItemValue('@myApp_key') : null;
+    } catch (e) {
+      console.warn(e);
+    }
+  };
+
+  async function removeItemValue(key: string) {
+    try {
+      await AsyncStorage.removeItem(key);
+      auth.signOut();
+      return navigation.push('Splash');
+    } catch (exception) {
+      return false;
+    }
+  }
+
   return (
     <Container>
-      <Text>Homepage</Text>
+      <TouchableOpacity onPress={logout}>
+        <Text>Homepage clicar para logout</Text>
+      </TouchableOpacity>
     </Container>
   );
 };

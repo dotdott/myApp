@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import firebase from 'firebase/app';
 import {auth} from '../../firebase';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import {Alert, Animated, ImageBackground} from 'react-native';
 import {
   Container,
@@ -50,23 +52,34 @@ export const Login = ({navigation}: any) => {
           email: loginEmail,
           password: loginPassword,
         });
+
+        return navigation.navigate('Homepage');
       } catch (err) {
         console.log(err);
       }
     }
-    // return navigation.navigate('Homepage');
   }
 
   function SignIn(email: string, password: string) {
     return auth.signInWithEmailAndPassword(email, password);
   }
 
+  const storeData = async (key: string) => {
+    try {
+      await AsyncStorage.setItem('@myApp_key', JSON.stringify(key));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
+    const unsubscribe = auth.onAuthStateChanged(async user => {
+      const newdata: any = user?.toJSON();
+
+      await storeData(newdata.stsTokenManager.accessToken);
       setCurrentUser(user);
     });
 
-    console.log(user);
     return unsubscribe;
   }, [SignIn]);
 
