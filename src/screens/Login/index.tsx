@@ -1,21 +1,28 @@
 import React, {useEffect, useState} from 'react';
 import firebase from 'firebase/app';
-import {auth} from '../../firebase';
+// import app, {auth} from '../../firebase';
+import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import {Alert, Animated, ImageBackground} from 'react-native';
+import {Alert, Animated, ImageBackground, Text, View} from 'react-native';
 import {
   Container,
   EmailInput,
+  InputText,
   LoginButton,
   LoginText,
+  LoginWithOthers,
+  LoginWithFacebook,
+  LoginWithGoogle,
+  LoginWithText,
   PasswordInput,
   RegisterSpan,
   RegisterText,
 } from './styles';
 import {useDispatch, useSelector} from 'react-redux';
 import {Types} from '../../store/reducers/authReducer';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 
 const wallpaper = {
   uri: 'https://www.fashionwallpaper.co.uk/media/catalog/product/cache/1/image/475x/040ec09b1e35df139433887a97daa66f/_/_/__auto_tile_24310__137144full.png',
@@ -25,7 +32,8 @@ export const Login = ({navigation}: any) => {
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [bouncingLogin] = useState(new Animated.ValueXY({x: 0, y: 150}));
-  const [currentUser, setCurrentUser] = useState<firebase.User | null>(null);
+  const [currentUser, setCurrentUser] =
+    useState<FirebaseAuthTypes.User | null>(null);
   const dispatch = useDispatch();
   const user = useSelector<any>(state => state.authReducer);
 
@@ -46,7 +54,6 @@ export const Login = ({navigation}: any) => {
     if (loginEmail !== '' && loginPassword !== '') {
       try {
         await SignIn(loginEmail, loginPassword);
-
         dispatch({
           type: Types.CURRENT_USER,
           email: loginEmail,
@@ -60,9 +67,22 @@ export const Login = ({navigation}: any) => {
     }
   }
 
+  // async function handleLoginWithFacebook() {
+  //   await SignInFacebook();
+  // }
+
   function SignIn(email: string, password: string) {
-    return auth.signInWithEmailAndPassword(email, password);
+    return auth().signInWithEmailAndPassword(email, password);
   }
+
+  // async function SignInFacebook() {
+  //   const provider = new firebase.auth.FacebookAuthProvider();
+
+  //   // const result = await app.auth().signInWithPopup(provider);
+
+  //   console.log(result);
+  //   return result;
+  // }
 
   const storeData = async (key: string) => {
     try {
@@ -73,13 +93,11 @@ export const Login = ({navigation}: any) => {
   };
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async user => {
+    const unsubscribe = auth().onAuthStateChanged(async user => {
       const newdata: any = user?.toJSON();
-
-      await storeData(newdata.stsTokenManager.accessToken);
+      await storeData(newdata.uid);
       setCurrentUser(user);
     });
-
     return unsubscribe;
   }, [SignIn]);
 
@@ -101,13 +119,16 @@ export const Login = ({navigation}: any) => {
           width: '100%',
           height: '100%',
         }}>
+        <InputText>Email</InputText>
         <EmailInput
-          placeholder="E-mail"
+          placeholder="Digite seu E-mail"
           autoCorrect={false}
           onChangeText={(e: string) => setLoginEmail(e)}
         />
+
+        <InputText>Senha</InputText>
         <PasswordInput
-          placeholder="Senha"
+          placeholder="Digite sua Senha"
           autoCorrect={false}
           secureTextEntry
           onChangeText={(e: string) => setLoginPassword(e)}
@@ -116,6 +137,19 @@ export const Login = ({navigation}: any) => {
         <LoginButton onPress={handleLogin}>
           <LoginText>Login</LoginText>
         </LoginButton>
+
+        <LoginWithOthers>
+          {/* onPress={handleLoginWithFacebook} */}
+          <LoginWithFacebook>
+            <Icon name="facebook" solid color="#fff" size={26} />
+            <LoginWithText>Facebook</LoginWithText>
+          </LoginWithFacebook>
+
+          <LoginWithGoogle>
+            <Icon name="google" solid color="#fff" size={26} />
+            <LoginWithText>Google</LoginWithText>
+          </LoginWithGoogle>
+        </LoginWithOthers>
 
         <RegisterText>Não tem uma conta?</RegisterText>
         <RegisterSpan onPress={handleSignUpRedirect}>

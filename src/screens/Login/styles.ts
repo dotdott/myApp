@@ -9,22 +9,23 @@ export const Container = styled.View`
 `;
 
 export const EmailInput = styled.TextInput`
-  border: 1px solid ${myVar.orange};
-  border-radius: 10px;
+  border-color: ${myVar.orange};
+  border-bottom-width: 2px;
   padding: 7px 15px;
   font-size: ${myVar.text_size};
   width: 90%;
-  background: rgba(255, 255, 255, 0.5);
   margin-bottom: 10px;
 `;
 
-export const PasswordInput = styled.TextInput`
-  border: 1px solid ${myVar.orange};
-  border-radius: 10px;
-  padding: 7px 15px;
-  background: rgba(255, 255, 255, 0.5);
-  font-size: ${myVar.text_size};
-  width: 90%;
+export const PasswordInput = styled(EmailInput)`
+  margin-bottom: 0px;
+`;
+
+export const InputText = styled.Text`
+  width: 88%;
+  font-size: 20;
+  color: ${myVar.orange};
+  font-weight: bold;
 `;
 
 export const LoginButton = styled.TouchableOpacity`
@@ -52,4 +53,33 @@ export const RegisterSpan = styled.Text`
   color: ${myVar.orange};
   font-weight: bold;
   font-size: 15px;
+`;
+
+export const LoginWithOthers = styled.View`
+  flex-direction: row;
+  margin: 15px 0;
+`;
+
+export const LoginWithFacebook = styled.TouchableOpacity`
+  background: #2851a3;
+  flex: 1;
+  margin-left: 20px;
+  border-radius: 10px;
+  padding: 3px 10px;
+  flex-direction: row;
+  align-items: center;
+`;
+export const LoginWithGoogle = styled(LoginWithFacebook)`
+  background: #cf4333;
+  margin-left: 10px;
+  margin-right: 20px;
+  padding-bottom: 5px;
+`;
+
+export const LoginWithText = styled.Text`
+  color: #fff;
+  font-size: ${myVar.text_size};
+  font-weight: bold;
+  flex: 1;
+  text-align: center;
 `;
