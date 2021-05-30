@@ -54,7 +54,6 @@ export const Login = ({navigation}: any) => {
         dispatch({
           type: Types.CURRENT_USER,
           email: loginEmail,
-          password: loginPassword,
         });
 
         return navigation.navigate('Homepage');
@@ -92,16 +91,25 @@ export const Login = ({navigation}: any) => {
 
           putAsyncStorageToken(JSON.stringify(token.accessToken));
 
-          const result = await auth().signInWithCredential(provider);
+          const {additionalUserInfo}: any = await auth().signInWithCredential(
+            provider,
+          );
+
+          console.log(additionalUserInfo.profile.name);
+
+          dispatch({
+            type: Types.CURRENT_USER,
+            email: additionalUserInfo.profile.name,
+            name: additionalUserInfo.profile.name,
+            first_name: additionalUserInfo.profile.first_name,
+            picture_url: additionalUserInfo.profile.picture.data.url,
+          });
 
           return navigation.navigate('Homepage');
-
-          return result;
         } catch (err) {
           console.log(err);
         }
       }
-
       if (result.isCancelled) {
         throw 'User cancelled the login process';
       }
