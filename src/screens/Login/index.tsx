@@ -1,28 +1,25 @@
-import React, {useEffect, useState} from 'react';
-import firebase from 'firebase/app';
-// import app, {auth} from '../../firebase';
-import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import React, {useEffect, useState} from 'react';
+import {Alert, Animated, ImageBackground} from 'react-native';
+import {AccessToken, LoginManager} from 'react-native-fbsdk-next';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import {useDispatch, useSelector} from 'react-redux';
+import {Types} from '../../store/reducers/authReducer';
 
-import {Alert, Animated, ImageBackground, Text, View} from 'react-native';
 import {
-  Container,
   EmailInput,
   InputText,
   LoginButton,
   LoginText,
-  LoginWithOthers,
   LoginWithFacebook,
   LoginWithGoogle,
+  LoginWithOthers,
   LoginWithText,
   PasswordInput,
   RegisterSpan,
   RegisterText,
 } from './styles';
-import {useDispatch, useSelector} from 'react-redux';
-import {Types} from '../../store/reducers/authReducer';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 
 const wallpaper = {
   uri: 'https://www.fashionwallpaper.co.uk/media/catalog/product/cache/1/image/475x/040ec09b1e35df139433887a97daa66f/_/_/__auto_tile_24310__137144full.png',
@@ -67,24 +64,55 @@ export const Login = ({navigation}: any) => {
     }
   }
 
-  // async function handleLoginWithFacebook() {
-  //   await SignInFacebook();
-  // }
+  async function handleLoginWithFacebook() {
+    await SignInFacebook();
+  }
 
   function SignIn(email: string, password: string) {
     return auth().signInWithEmailAndPassword(email, password);
   }
 
-  // async function SignInFacebook() {
-  //   const provider = new firebase.auth.FacebookAuthProvider();
+  async function SignInFacebook() {
+    try {
+      const result = await LoginManager.logInWithPermissions([
+        'public_profile',
+        'email',
+      ]);
 
-  //   // const result = await app.auth().signInWithPopup(provider);
+      // console.log('result do try: ' + result);
 
-  //   console.log(result);
-  //   return result;
-  // }
+      const token = await AccessToken.getCurrentAccessToken();
+      // console.log('token: ' + JSON.stringify(token));
 
-  const storeData = async (key: string) => {
+      if (token) {
+        try {
+          const provider = auth.FacebookAuthProvider.credential(
+            token.accessToken,
+          );
+
+          putAsyncStorageToken(JSON.stringify(token.accessToken));
+
+          const result = await auth().signInWithCredential(provider);
+
+          return navigation.navigate('Homepage');
+
+          return result;
+        } catch (err) {
+          console.log(err);
+        }
+      }
+
+      if (result.isCancelled) {
+        throw 'User cancelled the login process';
+      }
+
+      return result;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  const putAsyncStorageToken = async (key: string) => {
     try {
       await AsyncStorage.setItem('@myApp_key', JSON.stringify(key));
     } catch (e) {
@@ -95,7 +123,7 @@ export const Login = ({navigation}: any) => {
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(async user => {
       const newdata: any = user?.toJSON();
-      await storeData(newdata.uid);
+      await putAsyncStorageToken(newdata.uid);
       setCurrentUser(user);
     });
     return unsubscribe;
@@ -139,8 +167,7 @@ export const Login = ({navigation}: any) => {
         </LoginButton>
 
         <LoginWithOthers>
-          {/* onPress={handleLoginWithFacebook} */}
-          <LoginWithFacebook>
+          <LoginWithFacebook onPress={handleLoginWithFacebook}>
             <Icon name="facebook" solid color="#fff" size={26} />
             <LoginWithText>Facebook</LoginWithText>
           </LoginWithFacebook>
