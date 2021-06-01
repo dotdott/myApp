@@ -2,9 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import React, {useEffect, useState} from 'react';
 import {Alert, Animated, ImageBackground} from 'react-native';
-import {AccessToken, LoginManager} from 'react-native-fbsdk-next';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import {useDispatch, useSelector} from 'react-redux';
+import GoogleSignInButton from '../../components/GoogleSingInButton';
+import FacebookSignInButton from '../../components/FacebookSignInButton';
+import {Types as TypesPlataform} from '../../store/reducers/authReducer';
 import {Types} from '../../store/reducers/authReducer';
 
 import {
@@ -56,6 +57,11 @@ export const Login = ({navigation}: any) => {
           email: loginEmail,
         });
 
+        dispatch({
+          type: TypesPlataform.SET_PLATAFORM_LOGGEDED,
+          plataform_loggeded: 'main',
+        });
+
         return navigation.navigate('Homepage');
       } catch (err) {
         console.log(err);
@@ -63,61 +69,8 @@ export const Login = ({navigation}: any) => {
     }
   }
 
-  async function handleLoginWithFacebook() {
-    await SignInFacebook();
-  }
-
   function SignIn(email: string, password: string) {
     return auth().signInWithEmailAndPassword(email, password);
-  }
-
-  async function SignInFacebook() {
-    try {
-      const result = await LoginManager.logInWithPermissions([
-        'public_profile',
-        'email',
-      ]);
-
-      // console.log('result do try: ' + result);
-
-      const token = await AccessToken.getCurrentAccessToken();
-      // console.log('token: ' + JSON.stringify(token));
-
-      if (token) {
-        try {
-          const provider = auth.FacebookAuthProvider.credential(
-            token.accessToken,
-          );
-
-          putAsyncStorageToken(JSON.stringify(token.accessToken));
-
-          const {additionalUserInfo}: any = await auth().signInWithCredential(
-            provider,
-          );
-
-          console.log(additionalUserInfo.profile.name);
-
-          dispatch({
-            type: Types.CURRENT_USER,
-            email: additionalUserInfo.profile.name,
-            name: additionalUserInfo.profile.name,
-            first_name: additionalUserInfo.profile.first_name,
-            picture_url: additionalUserInfo.profile.picture.data.url,
-          });
-
-          return navigation.navigate('Homepage');
-        } catch (err) {
-          console.log(err);
-        }
-      }
-      if (result.isCancelled) {
-        throw 'User cancelled the login process';
-      }
-
-      return result;
-    } catch (err) {
-      console.log(err);
-    }
   }
 
   const putAsyncStorageToken = async (key: string) => {
@@ -130,9 +83,12 @@ export const Login = ({navigation}: any) => {
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(async user => {
-      const newdata: any = user?.toJSON();
-      await putAsyncStorageToken(newdata.uid);
-      setCurrentUser(user);
+      const newdata = user;
+
+      if (newdata) {
+        await putAsyncStorageToken(newdata.uid);
+        setCurrentUser(user);
+      }
     });
     return unsubscribe;
   }, [SignIn]);
@@ -175,15 +131,23 @@ export const Login = ({navigation}: any) => {
         </LoginButton>
 
         <LoginWithOthers>
-          <LoginWithFacebook onPress={handleLoginWithFacebook}>
+          {/* <LoginWithFacebook onPress={handleLoginWithFacebook}>
             <Icon name="facebook" solid color="#fff" size={26} />
             <LoginWithText>Facebook</LoginWithText>
-          </LoginWithFacebook>
+          </LoginWithFacebook> */}
+          <FacebookSignInButton
+            putAsyncStorageToken={putAsyncStorageToken}
+            navigation={navigation}
+          />
 
-          <LoginWithGoogle>
+          {/* <LoginWithGoogle>
             <Icon name="google" solid color="#fff" size={26} />
             <LoginWithText>Google</LoginWithText>
-          </LoginWithGoogle>
+          </LoginWithGoogle> */}
+          <GoogleSignInButton
+            putAsyncStorageToken={putAsyncStorageToken}
+            navigation={navigation}
+          />
         </LoginWithOthers>
 
         <RegisterText>Não tem uma conta?</RegisterText>

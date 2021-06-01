@@ -14,6 +14,7 @@ interface currentUserStateData {
     name: string;
     first_name: string;
     picture_url: string;
+    plataform_loggeded: string;
   };
 }
 
@@ -44,6 +45,7 @@ export const Home = ({navigation}: any) => {
 
   useEffect(() => {
     console.log(currentUser.first_name);
+    console.log(currentUser.plataform_loggeded);
   }, [currentUser]);
 
   return (
